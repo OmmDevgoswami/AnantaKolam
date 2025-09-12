@@ -12,3 +12,4 @@ streamlit-drawable-canvas==0.9.3
 requests==2.32.3
 pydantic==2.11.5
 langchain-google-genai==2.1.10
+openai>=1.86.0
