@@ -53,7 +53,7 @@ with st.sidebar.container(height = 380):
         st.write("Welcome to the AnantaKolam ")
         st.markdown("""
         <div style='text-align: center;'>
-                <img src="https://ik.imagekit.io/o0nppkxow/Kolam_design_5.png?updatedAt=1757677700838" alt="AnantaKolam Banner" width = "200" />
+                <img src="https://ik.imagekit.io/o0nppkxow/Kolam_design_5_long%20(1).png?updatedAt=1757718152888" alt="AnantaKolam Banner" width = "200" />
                 <h3 style='color: gray;'> Infinite patterns, infinite stories. </h3>
                 <br />
                 <p style='color: gray;' > Built using Python - Streamlit, Pollination AI Image Generation and Sutra-multilingual model </p>
