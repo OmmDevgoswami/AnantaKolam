@@ -23,7 +23,7 @@ pages = [
         icon=":material/analytics:"
     ),
     st.Page(
-        "Kolam_canva.py",
+        "kolam_Canva.py",
         title="Kolam:Canva and Brush",
         icon=":material/palette:"
     ),
