@@ -1,7 +1,7 @@
 import streamlit as st
 from cards import analysis_card, blog_card, one_on_one_card, kolam_canva_card, kolam_generator_card
 
-st.set_page_config(page_title="SikshaSathi", layout="wide")
+st.set_page_config(page_title="AnantaKolam", layout="wide")
 st.markdown("""
 <div style='text-align: center;'>    
     <img src="https://ik.imagekit.io/o0nppkxow/Kolam_design_5_long.png?updatedAt=1757679235240" alt="AnantaKolam Banner" width = "500" />
@@ -16,10 +16,8 @@ st.markdown("""
 
 cols = st.columns(2)
 with cols[0].container(height = 380):
-    blog_card()
-with cols[1].container(height = 380):
     analysis_card()
-with cols[0].container(height = 380):
+with cols[1].container(height = 380):
     kolam_canva_card()
 with cols[1].container(height = 380):
     kolam_generator_card

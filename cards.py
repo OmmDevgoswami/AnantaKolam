@@ -70,11 +70,53 @@ def blog_card():
             
 def kolam_generator_card():
     st.page_link("Kolam_Generator.py" , label = "blog", icon = ":material/indeterminate_question_box:")
-    user_input = st.text_input("How May i assist you ?", placeholder = "Let's work out this doubt together...")
-    audio_input = st.audio_input("Here to help you !!")
-    if user_input or audio_input:
-        with st.spinner("Generating the Response.."):
-            st.success("Content Generated !! Click Here to have the full use of this feature.")
+    st.markdown("<h1>🖌️ Kolam Kraziness</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color: gray; font-size:18px;'>Click generate and watch your Kolam dots dance! 🌸✨</p>", unsafe_allow_html=True)
+
+
+    state_prompts = {
+        "Tamil Nadu": "A traditional Tamil Nadu Kolam design, symmetric, floral dots",
+        "Andhra Pradesh": "A Muggu style border pattern Kolam from Andhra Pradesh, symmetric",
+        "Karnataka": "Kolam inspired by Karnataka folk motifs, intricate and symmetric",
+        "Kerala": "Kerala floral circular Kolam, vibrant and traditional",
+        "Odisha": "Odisha Jhoti Chita style Kolam, intricate and cultural",
+        "Maharashtra": "Maharashtra rangoli-inspired Kolam with geometric patterns, colorful",
+        "West Bengal": "Alpana style Kolam from West Bengal, intricate floral patterns",
+        "Gujarat": "Gujarat traditional rangoli-inspired Kolam, bright and symmetric",
+        "Rajasthan": "Rajasthani Kolam with desert motifs, symmetrical and decorative",
+        "Punjab": "Punjabi folk art Kolam, floral and vibrant with cultural elements"
+    }
+
+
+    st.sidebar.header("🎯 Options")
+    state = st.sidebar.selectbox("Choose a State", [""] + list(state_prompts.keys()))
+    festival = st.sidebar.selectbox("Choose Festival/Occasion (Optional)", ["None", "Pongal", "Diwali", "Onam", "Holi", "Navratri"])
+
+
+    if festival != "None":
+        festival_colors = {
+            "Pongal": "#FFF5E6",
+            "Diwali": "#1a1a1a",
+            "Onam": "#E6FFE6",
+            "Holi": "#FFF0F5",
+            "Navratri": "#FFF8E1"
+        }
+        st.markdown(f"<style>body{{background-color: {festival_colors.get(festival, '#FFFFFF')};}}</style>", unsafe_allow_html=True)
+
+
+    if "gallery" not in st.session_state:
+        st.session_state.gallery = []
+
+
+    if st.sidebar.button("Generate Kolam"):
+        if not state:
+            st.warning("⚠️ Please select a state first.")
+        else:
+            prompt = state_prompts[state]
+            if festival != "None":
+                prompt += f" for {festival} festival"
+
+            st.info(f"✨ Generating a unique Kolam for {state}...")
             
 def kolam_canva_card():
     st.page_link("Kolam_canva.py" , label = "Canva", icon = ":material/palette:")
