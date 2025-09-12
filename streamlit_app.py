@@ -1,5 +1,5 @@
 import streamlit as st
-from cards import analysis_card, blog_card, one_on_one_card, kolam_canva_card
+from cards import analysis_card, blog_card, one_on_one_card, kolam_canva_card, kolam_generator_card
 
 pages = [
     st.Page(
@@ -15,6 +15,11 @@ pages = [
     st.Page(
         "Analysis.py",
         title="Kolam Decoder",
+        icon=":material/analytics:"
+    ),
+    st.Page(
+        "Kolam_Generator.py",
+        title="Kolam: Generate Cultural Patterns Digitals",
         icon=":material/analytics:"
     ),
     st.Page(
@@ -37,6 +42,8 @@ with st.sidebar.container(height = 380):
         blog_card()
     elif page.title == "Kolam Decoder":
         analysis_card()
+    elif page.title == "Kolam: Generate Cultural Patterns Digitals":
+        kolam_generator_card()
     elif page.title == "Kolam:Canva and Brush":
         kolam_canva_card()
     elif page.title == "Special One-on-One":
@@ -49,7 +56,7 @@ with st.sidebar.container(height = 380):
                 <img src="https://ik.imagekit.io/o0nppkxow/Kolam_design_5.png?updatedAt=1757677700838" alt="AnantaKolam Banner" width = "200" />
                 <h3 style='color: gray;'> Infinite patterns, infinite stories. </h3>
                 <br />
-                <p style='color: gray;' > Built using Python - Streamlit, Nanobanana Image Generation and Sutra-multilingual model </p>
+                <p style='color: gray;' > Built using Python - Streamlit, Pollination AI Image Generation and Sutra-multilingual model </p>
         </div>
         """, unsafe_allow_html=True)
 

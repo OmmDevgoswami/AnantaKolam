@@ -3,9 +3,14 @@ import streamlit as st
 def analysis_card():
     st.page_link(page = "Analysis.py" , label = "Aanlysis", icon = ":material/analytics:")
     st.markdown('<h2 class="section-header">📋 Analysis Results</h2>', unsafe_allow_html=True)
-        
+    
+    uploaded_file = st.file_uploader(
+            "Drag and drop your kolam image here, or click to browse",
+            type=['png', 'jpg', 'jpeg', 'gif', 'bmp'],
+            help="Upload a high-quality image of what you think might be a kolam art pattern"
+        )
     analyze_button = st.button("🔍 Analyze Kolam Pattern", type="primary", use_container_width=True)
-    if analyze_button and uploaded_file and model:
+    if analyze_button:
         with st.spinner("🧠 Analyzing patterns and cultural significance..."):
             image = Image.open(uploaded_file)
             analysis_result = analyze_kolam_image(model, image)
@@ -28,8 +33,6 @@ def analysis_card():
                             formatted_result += f"{line.strip()}\n\n"
                     
                 st.markdown(formatted_result)
-                    
-                # Additional enhancement
                 st.markdown("---")
                 st.info("🌟 **Cultural Insight**: This analysis preserves and shares the rich mathematical and spiritual heritage of Indian kolam traditions!")
         
@@ -59,6 +62,14 @@ def analysis_card():
     
 def blog_card():
     st.page_link("Blog.py" , label = "blog", icon = ":material/indeterminate_question_box:")
+    user_input = st.text_input("How May i assist you ?", placeholder = "Let's work out this doubt together...")
+    audio_input = st.audio_input("Here to help you !!")
+    if user_input or audio_input:
+        with st.spinner("Generating the Response.."):
+            st.success("Content Generated !! Click Here to have the full use of this feature.")
+            
+def kolam_generator_card():
+    st.page_link("Kolam_Generator.py" , label = "blog", icon = ":material/indeterminate_question_box:")
     user_input = st.text_input("How May i assist you ?", placeholder = "Let's work out this doubt together...")
     audio_input = st.audio_input("Here to help you !!")
     if user_input or audio_input:

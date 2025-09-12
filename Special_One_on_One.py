@@ -1,27 +1,5 @@
 import streamlit as st
 import requests
-import os
-from dotenv import load_dotenv
-
-# -----------------------------
-# Load environment variables
-# -----------------------------
-load_dotenv()
-
-# -----------------------------
-# Sheety / Environment config
-# -----------------------------
-
-
-# Safely load API key from Streamlit secrets or .env
-try:
-    SHEETLY_API_KEY = st.secrets["SHEETLY_API_KEY"]
-except Exception:
-    SHEETLY_API_KEY = os.getenv("SHEETLY_API_KEY")
-
-if not SHEETLY_API_KEY:
-    st.warning("⚠ No API key found! Please set SHEETLY_API_KEY in `.env` or `.streamlit/secrets.toml`")
-
 # -----------------------------
 # Artist Data
 # -----------------------------

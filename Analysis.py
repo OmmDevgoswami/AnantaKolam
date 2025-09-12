@@ -189,7 +189,7 @@ def apply_custom_css():
     
     /* Markdown text styling */
     .stMarkdown {
-        color: #fcfafa !important;
+        color: #21130d !important;
     }
     
     /* History section styling */
