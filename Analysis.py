@@ -4,17 +4,20 @@ from PIL import Image
 import io
 from typing import Optional
 import os
+import dotenv
+# Load environment variables from .env file
+dotenv.load_dotenv()
 
 # Configure page
 st.set_page_config(
-    page_title="Kolam Art Analyzer",
+    page_title="Kolam Art Decoder",
     page_icon="🎨",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
 # Your API key (replace with your actual API key)
-GEMINI_API_KEY = "AIzaSyBMThlSDjHMjrCsfxu8bjUZ8VBkDkCYKHg"
+GEMINI_API_KEY = os.getenv("GEMINI_KEY")
 
 # Fixed prompt for kolam analysis
 KOLAM_PROMPT = """If this is a kolam art then only reply otherwise say that "Are you sure this is a kolam?". 
@@ -290,7 +293,7 @@ def main():
     apply_custom_css()
     
     # Header with gradient text
-    st.markdown('<h1 class="gradient-title">🎨 Kolam Art Analyzer</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="gradient-title">🎨 Kolam Art Decoder</h1>', unsafe_allow_html=True)
     st.markdown('<p class="gradient-subtitle">Discover the Mathematical Beauty and Cultural Heritage of Traditional Indian Kolam Art</p>', unsafe_allow_html=True)
     
     # Initialize Gemini model

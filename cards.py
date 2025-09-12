@@ -1,25 +1,64 @@
 import streamlit as st
 
-def roadmap_card():
-    st.page_link(page = "Roadmap.py" , label = "Roadmap", icon = ":material/view_timeline:")
-    st.selectbox("Choose your path:",
-    ("Class-10 / Metric", "Class-12/ +2", "JEE - Mains + Advance", "NEET - Medical", "UPSC"),
-    index=None,
-    placeholder="Select Exam you are preparing for...",
-)
-    video_html = """
-    <div style='text-align: center;'>
-        <video width="250" autoplay muted loop controls>
-            <source src="https://ik.imagekit.io/o0nppkxow/694147060120069.mp4?updatedAt=1751606716572" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-    </div>
-    """
+def analysis_card():
+    st.page_link(page = "Analysis.py" , label = "Aanlysis", icon = ":material/analytics:")
+    st.markdown('<h2 class="section-header">📋 Analysis Results</h2>', unsafe_allow_html=True)
+        
+    analyze_button = st.button("🔍 Analyze Kolam Pattern", type="primary", use_container_width=True)
+    if analyze_button and uploaded_file and model:
+        with st.spinner("🧠 Analyzing patterns and cultural significance..."):
+            image = Image.open(uploaded_file)
+            analysis_result = analyze_kolam_image(model, image)
 
-    st.markdown(video_html, unsafe_allow_html=True)
+            if "Are you sure this is a kolam?" in analysis_result:
+                st.warning(f"🤔 {analysis_result}")
+                st.info("💡 Try uploading a clearer image of a kolam pattern, or learn more about kolam art below!")
+            else:
+                st.success("✅ Authentic Kolam Pattern Detected!")
+                st.markdown("### 🎯 **Detailed Analysis**")
+
+                lines = analysis_result.split('\n')
+                formatted_result = ""
+                    
+                for line in lines:
+                    if line.strip():
+                        if any(keyword in line.lower() for keyword in ['region', 'mathematical', 'grids', 'history', 'importance']):
+                            formatted_result += f"**{line.strip()}**\n\n"
+                        else:
+                            formatted_result += f"{line.strip()}\n\n"
+                    
+                st.markdown(formatted_result)
+                    
+                # Additional enhancement
+                st.markdown("---")
+                st.info("🌟 **Cultural Insight**: This analysis preserves and shares the rich mathematical and spiritual heritage of Indian kolam traditions!")
+        
+    elif not uploaded_file and analyze_button:
+        st.error("Please upload an image first!")
+        
+    elif not analyze_button:
+        # Enhanced about section
+        st.markdown("""
+        ### 🌸 **About Kolam Art**
+            
+            Kolam is a **sacred geometric art form** from South India that combines:
+            
+            ✨ **Spiritual Significance** - Daily offerings to deities  
+            🔢 **Mathematical Precision** - Complex geometric patterns  
+            👩‍👩‍👧 **Cultural Heritage** - Passed through generations  
+            🎨 **Artistic Beauty** - Intricate designs and symmetry  
+            
+            ---
+            
+            ### 🚀 **How to Use**
+            1. **Upload** a clear image of a kolam pattern
+            2. **Click** the analyze button
+            3. **Discover** the region, mathematics, and cultural significance
+            4. **Learn** about this beautiful traditional art form
+            """)
     
-def doubt_clearing_card():
-    st.page_link("Doubt_solver.py" , label = "doubt", icon = ":material/indeterminate_question_box:")
+def blog_card():
+    st.page_link("Blog.py" , label = "blog", icon = ":material/indeterminate_question_box:")
     user_input = st.text_input("How May i assist you ?", placeholder = "Let's work out this doubt together...")
     audio_input = st.audio_input("Here to help you !!")
     if user_input or audio_input:
@@ -27,7 +66,7 @@ def doubt_clearing_card():
             st.success("Content Generated !! Click Here to have the full use of this feature.")
             
 def kolam_canva_card():
-    st.page_link("Kolam_canva.py" , label = "mock", icon = ":material/palette:")
+    st.page_link("Kolam_canva.py" , label = "Canva", icon = ":material/palette:")
     st.header("Canvas & Brush Settings")
     canvas_size = 300
     bg_color = st.color_picker("Background Color", "#071029")
