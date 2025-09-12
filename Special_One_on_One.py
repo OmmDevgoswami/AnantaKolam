@@ -1,32 +1,49 @@
 import streamlit as st
 import requests
 import os
-import dotenv
-dotenv.load_dotenv()
+from dotenv import load_dotenv
 
-# Sheetly API Config
-SHEETLY_API_URL = "https://api.sheety.co/690912ab2d5431ff9ad361fb8b81f47a/sessioRecord/sheet1"
-SHEETLY_API_KEY = os.getenv("SHEETLY_API_KEY")  
+# -----------------------------
+# Load environment variables
+# -----------------------------
+load_dotenv()
 
-mentor_data = {
-    "JEE": {
-        "Mathematics": {"mentor": "Dharmeshwar Mehta", "times": ["10:00 AM", "11:00 AM", "2:00 PM"]},
-        "Physics": {"mentor": "Shalini Kapur", "times": ["11:00 AM", "1:00 PM", "3:00 PM"]},
-        "Chemistry": {"mentor": "Kritivya", "times": ["12:00 PM", "2:30 PM", "4:00 PM"]},
+# -----------------------------
+# Sheety / Environment config
+# -----------------------------
+
+
+# Safely load API key from Streamlit secrets or .env
+try:
+    SHEETLY_API_KEY = st.secrets["SHEETLY_API_KEY"]
+except Exception:
+    SHEETLY_API_KEY = os.getenv("SHEETLY_API_KEY")
+
+if not SHEETLY_API_KEY:
+    st.warning("⚠ No API key found! Please set SHEETLY_API_KEY in `.env` or `.streamlit/secrets.toml`")
+
+# -----------------------------
+# Artist Data
+# -----------------------------
+artist_data = {
+    "Pull Kolam": {
+        "Intermediate": {"Artist": "Dharmeshwar Mehta", "times": ["10:00 AM", "11:00 AM", "2:00 PM"]},
+        "Advanced": {"Artist": "Shalini Kapur", "times": ["11:00 AM", "1:00 PM", "3:00 PM"]},
+        "Expert": {"Artist": "Kritivya", "times": ["12:00 PM", "2:30 PM", "4:00 PM"]},
     },
-    "NEET": {
-        "Biology": {"mentor": "Ananya Talwar", "times": ["10:30 AM", "12:30 PM", "3:30 PM"]},
-        "Physics": {"mentor": "Vishwajeet Patil", "times": ["11:30 AM", "1:30 PM", "4:30 PM"]},
-        "Chemistry": {"mentor": "Rishabh Dhanraj", "times": ["12:30 PM", "2:00 PM", "5:00 PM"]},
+    "Rangoli": {
+        "Intermediate": {"Artist": "Ananya Talwar", "times": ["10:30 AM", "12:30 PM", "3:30 PM"]},
+        "Advanced": {"Artist": "Vishwajeet Patil", "times": ["11:30 AM", "1:30 PM", "4:30 PM"]},
+        "Expert": {"Artist": "Rishabh Dhanraj", "times": ["12:30 PM", "2:00 PM", "5:00 PM"]},
     },
-    "UPSC": {
-        "General Knowledge": {"mentor": "Sunil Rao", "times": ["09:00 AM", "11:00 AM", "1:00 PM"]},
-        "History": {"mentor": "Vedant Rane", "times": ["10:00 AM", "12:00 PM", "2:00 PM"]},
-        "Politics": {"mentor": "Shivanik Sharma", "times": ["11:00 AM", "1:00 PM", "3:00 PM"]},
+    "Floral Kolam": {
+        "Intermediate": {"Artist": "Sunil Rao", "times": ["09:00 AM", "11:00 AM", "1:00 PM"]},
+        "Advanced": {"Artist": "Vedant Rane", "times": ["10:00 AM", "12:00 PM", "2:00 PM"]},
+        "Expert": {"Artist": "Shivanik Sharma", "times": ["11:00 AM", "1:00 PM", "3:00 PM"]},
     }
 }
 
-mentor_images = {
+artist_images = {
     "Dharmeshwar Mehta": "https://ik.imagekit.io/o0nppkxow/Faces/per1.jpeg",
     "Shalini Kapur": "https://ik.imagekit.io/o0nppkxow/Faces/per2.jpeg",
     "Kritivya": "https://ik.imagekit.io/o0nppkxow/Faces/per3.jpeg",
@@ -38,54 +55,98 @@ mentor_images = {
     "Shivanik Sharma": "https://ik.imagekit.io/o0nppkxow/Faces/per7.jpeg",
 }
 
-# Function to create mentor slot card
-def mentor_slot(subject, mentor_name, time_slots):
-    with st.expander(f"📘 {subject} — Meet {mentor_name}"):
-        st.image(mentor_images.get(mentor_name, ""), width=150)
-        st.markdown(f"**Subject:** {subject}")
-        st.markdown(f"**Mentor:** {mentor_name}")
+# -----------------------------
+# Helper: Mentor slot card (with form)
+# -----------------------------
+def mentor_slot(kolam, level, artist_name, time_slots):
+    """Render an expander with a booking form for a given kolam-level-artist."""
+    if not artist_name:
+        st.info("Artist details not available.")
+        return
 
-        selected_time = st.selectbox("Pick a Time Slot", time_slots, key=f"time_{subject}")
+    expander_key = f"exp_{kolam}_{level}"
+    form_key = f"form_{kolam}_{level}"
 
-        name = st.text_input("Your Name", key=f"name_{subject}")
-        email = st.text_input("Your Email", key=f"email_{subject}")
+    with st.expander(f"📘 {kolam} — {level} — Meet {artist_name}", expanded=False):
+        # artist photo (if available)
+        img_url = artist_images.get(artist_name)
+        if img_url:
+            st.image(img_url, width=150)
+        st.markdown(f"**Kolam:** {kolam}")
+        st.markdown(f"**Level:** {level}")
+        st.markdown(f"**Artist:** {artist_name}")
 
-        if st.button("Confirm Booking", key=f"btn_{subject}"):
-            if name and email:
+        # Use a form so the "Confirm Booking" only triggers when user submits
+        with st.form(key=form_key):
+            selected_time = st.selectbox(
+                "Pick a Time Slot",
+                time_slots if time_slots else ["No slots available"],
+                key=f"time_{kolam}_{level}"
+            )
+            name = st.text_input("Your Name", key=f"name_{kolam}_{level}")
+            email = st.text_input("Your Email", key=f"email_{kolam}_{level}")
+            submit = st.form_submit_button("Confirm Booking")
+
+            if submit:
+                if not name or not email:
+                    st.warning("Please enter both Name and Email.")
+                    return
+
                 booking_data = {
-                    "Mentor": mentor_name,
-                    "Subject": subject,
+                    "Artist": artist_name,
+                    "Kolam": kolam,
+                    "Level": level,
                     "Time Slot": selected_time,
                     "User Name": name,
                     "User Email": email
                 }
-                headers = {
-                    "Authorization": f"{SHEETLY_API_KEY}", 
-                    "Content-Type": "application/json"
-                }
-                response = requests.post(SHEETLY_API_URL, json={"sheet1": booking_data}, headers=headers)
-                if response.status_code == 200:
-                    st.success("Booking Confirmed and Saved!")
-                else:
-                    st.error("Failed to save booking. Please check your Sheet and tab name.")
-            else:
-                st.warning("Please enter both Name and Email.")
 
+                # Build headers
+                headers = {"Content-Type": "application/json"}
+                if SHEETLY_API_KEY:
+                    if SHEETLY_API_KEY.lower().startswith("bearer "):
+                        headers["Authorization"] = SHEETLY_API_KEY
+                    else:
+                        headers["Authorization"] = f"Bearer {SHEETLY_API_KEY}"
 
+                try:
+                    resp = requests.post(SHEETLY_API_URL, json={"sheet1": booking_data}, headers=headers, timeout=10)
+                    # Accept 200 or 201 as success (Sheety usually returns 201)
+                    if resp.status_code in (200, 201):
+                        st.success("✅ Booking Confirmed and Saved!")
+                    else:
+                        st.error(f"❌ Failed to save booking. Status code: {resp.status_code}\n\nResponse: {resp.text}")
+                except requests.exceptions.RequestException as e:
+                    st.error(f"Network error while saving booking: {e}")
 
+# -----------------------------
 # Main UI
-st.markdown("""
-<div style='text-align: center;'>
-    <h1>SikshaSathi - ଶିକ୍ଷାସାଥୀ</h1>
-    <h2>GuruTalks</h2>
-    <h3>From Questions to Confidence — Your Personal Mentor Awaits!</h3>
-</div>
-""", unsafe_allow_html=True)
+# -----------------------------
+st.markdown(
+    """
+    <div style='text-align: center;'>
+        <h1>AnantaKolam — Gurupaints</h1>
+        <h3>From artist to art — Your Personal Artist Awaits!</h3>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
-exam_choice = st.selectbox("Choose your target exam:", ("JEE", "NEET", "UPSC"), index=None, placeholder="Entrance Preparation...")
+st.write("---")
 
-if exam_choice:
-    subjects = list(mentor_data[exam_choice].keys())
-    for subject in subjects:
-        mentor_info = mentor_data[exam_choice][subject]
-        mentor_slot(subject, mentor_info["mentor"], mentor_info["times"])
+# kolam selection
+kolam_choice = st.selectbox("Choose your Kolam category:", list(artist_data.keys()))
+
+# show available artists/levels
+if kolam_choice:
+    levels = artist_data.get(kolam_choice, {})
+    if not levels:
+        st.info("No artist data available for this kolam.")
+    else:
+        for level_name, artist_info in levels.items():
+            artist_name = artist_info.get("Artist")
+            time_slots = artist_info.get("times", [])
+            mentor_slot(kolam_choice, level_name, artist_name, time_slots)
+
+st.write("---")
+st.info("💡 Add your `SHEETLY_API_KEY` to `.env` for local dev, or to `.streamlit/secrets.toml` for deployment.")
