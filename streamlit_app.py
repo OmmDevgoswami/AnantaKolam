@@ -1,5 +1,5 @@
 import streamlit as st
-from cards import roadmap_card, doubt_clearing_card, mock_test_card, one_on_one_card
+from cards import roadmap_card, doubt_clearing_card, one_on_one_card, kolam_canva_card
 
 pages = [
     st.Page(
@@ -18,9 +18,9 @@ pages = [
         icon=":material/indeterminate_question_box:"
     ),
     st.Page(
-        "Mock_test.py",
-        title="Mock Test Preparation",
-        icon=":material/assignment:"
+        "Kolam_canva.py",
+        title="Kolam:Canva and Brush",
+        icon=":material/palette:"
     ),
     st.Page(
         "Special_One_on_One.py",
@@ -37,8 +37,8 @@ with st.sidebar.container(height = 380):
         roadmap_card()
     elif page.title == "Doubt Solver":
         doubt_clearing_card()
-    elif page.title == "Mock Test Preparation":
-        mock_test_card()
+    elif page.title == "Kolam:Canva and Brush":
+        kolam_canva_card()
     elif page.title == "Special One-on-One":
         one_on_one_card()
     else:

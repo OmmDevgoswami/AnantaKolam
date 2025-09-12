@@ -26,52 +26,31 @@ def doubt_clearing_card():
         with st.spinner("Generating the Response.."):
             st.success("Content Generated !! Click Here to have the full use of this feature.")
             
-def mock_test_card():
-    st.page_link("Mock_test.py" , label = "mock", icon = ":material/assignment:")
-    choice = st.selectbox("Select Exam",
-    ("Class 10", "Class 12", "JEE", "NEET", "UPSC"),
-    index = None,
-    placeholder = "Exam Type"
-)
-    if choice == "Class 10":
-      with st.expander("Class 10 Subjects:"):  
-            st.selectbox("Select Subject",
-            ("Maths", "Science", "Social Science", "English", "Computer"),
-            index = None,
-            placeholder = "Class 10 Subject"
-            )
-    elif choice == "Class 12":
-      with st.expander("Class 12 Subjects:"):  
-            st.selectbox("Select Subject",
-            ("Maths", "Physics", "Chemistry", "Biology", "English", "Computer"),
-            index = None,
-            placeholder = "Class 12 Subject"
-            )
-    elif choice == "NEET":
-      with st.expander("NEET Subjects:"):  
-            st.selectbox("Select Subject",
-            ("Physics", "Chemistry", "Biology"),
-            index = None,
-            placeholder = "NEET Subject"
-            )
-    elif choice == "JEE":
-      with st.expander("JEE Subjects:"):  
-            st.selectbox("Select Subject",
-            ("Maths", "Physics", "Chemistry"),
-            index = None,
-            placeholder = "JEE Subject"
-            )
-    elif choice == "UPSC":
-      with st.expander("UPSC Subjects:"):  
-            st.selectbox("Select Subject",
-            ("General Knowledge", "History", "Poltics", "Current Affairs", "Reasoning", "Apptitude"),
-            index = None,
-            placeholder = "UPSC Subject"
-            )
-    st.slider("Choose number of questions: ", min_value = 1 , max_value = 10)
-    button = st.button("Generate Mock Paper")
-    if button:
-        st.success("Content Generated !! Click Here to have the full use of this feature.")
+def kolam_canva_card():
+    st.page_link("Kolam_canva.py" , label = "mock", icon = ":material/palette:")
+    st.header("Canvas & Brush Settings")
+    canvas_size = 300
+    bg_color = st.color_picker("Background Color", "#071029")
+    stroke_width = st.slider("Stroke Width", 1, 20, 3)
+    drawing_mode = st.selectbox("Brush Shape", ["freedraw", "line", "circle", "rect"])
+    mirror_count = st.selectbox("Number of Mirrors", [1, 2, 4, 6, 8], index=0)
+    color_options = {
+        "Pink": "#FFD6FF",
+        "Cyan": "#66FFF0",
+        "Orange": "#FF7B2F",
+        "Mint": "#2AF598",
+        "Blue": "#00C6FF",
+        "Yellow": "#FFFA66",
+        "Magenta": "#FF66A3"
+    }
+
+    st.write("**Brush Color:**")
+    stroke_color = st.session_state.get("selected_color", "#FFD6FF")
+    color_cols = st.columns(len(color_options))
+    for i, (name, hex_color) in enumerate(color_options.items()):
+        if color_cols[i].button(name, key=f"color_{name}"):
+            stroke_color = hex_color
+            st.session_state["selected_color"] = hex_color
     
 def one_on_one_card():
     st.page_link("Special_One_on_One.py" , label = "one_one", icon = ":material/person_raised_hand:")
