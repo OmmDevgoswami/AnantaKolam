@@ -56,7 +56,7 @@ st.write("**Brush Color:**")
 stroke_color = st.session_state.get("selected_color", "#FFD6FF")
 color_cols = st.columns(len(color_options))
 for i, (name, hex_color) in enumerate(color_options.items()):
-    if color_cols[i].button(name, key=f"color_{name}"):
+    if color_cols[i].button(name, key=f"color_{name}_{i}"):
         stroke_color = hex_color
         st.session_state["selected_color"] = hex_color
 
