@@ -13,7 +13,7 @@ from deep_translator import GoogleTranslator
 
 load_dotenv()
 
-SUTRA_API_KEY = "sutra_AWRZLG5E3Dxk6Z4Z3fs789UBSJwNs9v3pyDBGTDFfxiBQ3tlAXKIoUFVBM1H"
+SUTRA_API_KEY = os.getenv("SUTRA_API_KEY")
 
 sutra_model = OpenAILike(
     id="sutra-v2",
