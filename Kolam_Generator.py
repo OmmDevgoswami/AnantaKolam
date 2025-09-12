@@ -38,6 +38,11 @@ h1 {
     font-size: 14px;
     margin-top: 50px;
 }
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -60,9 +65,17 @@ state_prompts = {
 }
 
 
-st.sidebar.header("🎯 Options")
-state = st.sidebar.selectbox("Choose a State", [""] + list(state_prompts.keys()))
-festival = st.sidebar.selectbox("Choose Festival/Occasion (Optional)", ["None", "Pongal", "Diwali", "Onam", "Holi", "Navratri"])
+if "gallery" not in st.session_state:
+    st.session_state.gallery = []
+
+
+st.markdown("<h3 style='text-align: center;'>🌸🎊🪔 Choose Your Options 🌈</h3>", unsafe_allow_html=True)
+
+col1, col2, col3 = st.columns([1,2,1])
+with col2:
+    state = st.selectbox("🗺️ Choose a State", [""] + list(state_prompts.keys()))
+    festival = st.selectbox("🎉 Choose Festival/Occasion (Optional)", ["None", "Pongal", "Diwali", "Onam", "Holi", "Navratri"])
+    generate = st.button("✨ Generate Kolam ✨", use_container_width=True)
 
 
 if festival != "None":
@@ -76,11 +89,7 @@ if festival != "None":
     st.markdown(f"<style>body{{background-color: {festival_colors.get(festival, '#FFFFFF')};}}</style>", unsafe_allow_html=True)
 
 
-if "gallery" not in st.session_state:
-    st.session_state.gallery = []
-
-
-if st.sidebar.button("Generate Kolam"):
+if generate:
     if not state:
         st.warning("⚠️ Please select a state first.")
     else:
@@ -91,7 +100,7 @@ if st.sidebar.button("Generate Kolam"):
         st.info(f"✨ Generating a unique Kolam for {state}...")
 
         try:
-            
+ 
             adjectives = ["vibrant", "intricate", "colorful", "modern", "decorative", "traditional", "elegant"]
             layouts = ["symmetrical", "asymmetrical", "circular", "geometric", "ornamental"]
             style = random.choice(adjectives)
@@ -106,7 +115,7 @@ if st.sidebar.button("Generate Kolam"):
                 img = Image.open(BytesIO(response.content))
                 st.session_state.gallery.append((img, state))
 
-           
+   
                 components.html("""
                 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
                 <script>
@@ -139,11 +148,11 @@ if st.session_state.gallery:
     )
     st.markdown("</div>", unsafe_allow_html=True)
 
+
 if st.session_state.gallery and len(st.session_state.gallery) > 1:
     st.markdown("### 🖼️ Previous Kolams Generated")
     cols = st.columns(3)
     for idx, (img, state_name) in enumerate(st.session_state.gallery[:-1]):
         with cols[idx % 3]:
             st.image(img, caption=f"{state_name}", use_container_width=True)
-
 
