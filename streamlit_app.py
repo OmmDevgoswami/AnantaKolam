@@ -8,8 +8,8 @@ pages = [
         icon=":material/home:"
     ),
     st.Page(
-        "Roadmap.py",
-        title="Roadmap Generator",
+        "Blog.py",
+        title="Kolam: Heritage & Culture",
         icon=":material/view_timeline:"
     ),
     st.Page(
