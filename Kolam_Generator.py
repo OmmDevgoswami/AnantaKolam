@@ -1,226 +1,203 @@
 import streamlit as st
+from google import genai
 from PIL import Image
 from io import BytesIO
-import random
-import requests
-from requests.utils import quote
+import numpy as np
+import cv2
+from skimage import feature, filters
+import os
+from dotenv import load_dotenv
 import streamlit.components.v1 as components
-import matplotlib.pyplot as plt
 
 # -----------------------------
-# Page Config
+# CONFIG & API
 # -----------------------------
-st.set_page_config(
-    page_title="🖌 Kolam Kraziness",
-    page_icon="🌸",
-    layout="wide"
-)
+load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_KEY")
+client = genai.Client(api_key=GEMINI_API_KEY)
+
+st.set_page_config(page_title="🎨 AI Kolam Studio", page_icon="🌸", layout="wide")
+st.markdown("<h1 style='text-align:center;'>🎨 AI Kolam Generator </h1>", unsafe_allow_html=True)
 
 # -----------------------------
-# Custom CSS
+# KOLAM ACCURACY ANALYZER CLASS
 # -----------------------------
-st.markdown("""
-<style>
-h1 {
-    font-family: 'Pacifico', cursive;
-    background: linear-gradient(to right, purple, pink);
-    -webkit-background-clip: text;
-    color: transparent;
-    text-align: center;
-    font-size: 60px;
-}
-.card {
-    background-color: #f9f9f9;
-    padding: 15px;
-    border-radius: 15px;
-    box-shadow: 2px 2px 15px rgba(0,0,0,0.1);
-    text-align: center;
-    margin-bottom: 20px;
-}
-.footer {
-    text-align: center;
-    color: gray;
-    font-size: 14px;
-    margin-top: 50px;
-}
-.center {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-</style>
-""", unsafe_allow_html=True)
+class KolamAnalyzer:
+    def __init__(self):
+        self.weights = {
+            'symmetry': 0.45,
+            'continuous_lines': 0.35,
+            'dot_presence': 0.20
+        }
 
-# -----------------------------
-# Title
-# -----------------------------
-st.markdown("<h1>🖌 Kolam Kraziness</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align:center; color: gray; font-size:18px;'>Click generate and watch your Kolam dots dance! 🌸✨</p>", unsafe_allow_html=True)
+    def preprocess_image(self, image):
+        """Convert to grayscale + binary for analysis"""
+        if isinstance(image, Image.Image):
+            img_array = np.array(image.convert('L'))
+        else:
+            img_array = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        blurred = filters.gaussian(img_array, sigma=1.0)
+        binary = blurred < filters.threshold_otsu(blurred)
+        return (binary.astype(np.uint8) * 255)
 
-# -----------------------------
-# State Prompts
-# -----------------------------
-state_prompts = {
-    "Tamil Nadu": "A traditional Tamil Nadu Kolam design, symmetric, floral dots",
-    "Andhra Pradesh": "A Muggu style border pattern Kolam from Andhra Pradesh, symmetric",
-    "Karnataka": "Kolam inspired by Karnataka folk motifs, intricate and symmetric",
-    "Kerala": "Kerala floral circular Kolam, vibrant and traditional",
-    "Odisha": "Odisha Jhoti Chita style Kolam, intricate and cultural",
-    "Maharashtra": "Maharashtra rangoli-inspired Kolam with geometric patterns, colorful",
-    "West Bengal": "Alpana style Kolam from West Bengal, intricate floral patterns",
-    "Gujarat": "Gujarat traditional rangoli-inspired Kolam, bright and symmetric",
-    "Rajasthan": "Rajasthani Kolam with desert motifs, symmetrical and decorative",
-    "Punjab": "Punjabi folk art Kolam, floral and vibrant with cultural elements"
-}
+    def check_symmetry(self, image):
+        processed = self.preprocess_image(image)
+        h, w = processed.shape
+        left_half = processed[:, :w//2]
+        right_half = np.fliplr(processed[:, w//2:])
+        min_width = min(left_half.shape[1], right_half.shape[1])
+        left_half = left_half[:, :min_width]
+        right_half = right_half[:, :min_width]
+        vertical_score = ssim(left_half, right_half)
 
-# -----------------------------
-# Session State
-# -----------------------------
+        top_half = processed[:h//2, :]
+        bottom_half = np.flipud(processed[h//2:, :])
+        min_height = min(top_half.shape[0], bottom_half.shape[0])
+        top_half = top_half[:min_height, :]
+        bottom_half = bottom_half[:min_height, :]
+        horizontal_score = ssim(top_half, bottom_half)
+
+        return (vertical_score + horizontal_score) / 2
+
+    def check_continuous_lines(self, image):
+        processed = self.preprocess_image(image)
+        kernel = np.ones((3, 3), np.uint8)
+        processed = cv2.morphologyEx(processed, cv2.MORPH_CLOSE, kernel)
+        contours, _ = cv2.findContours(processed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if not contours:
+            return 0.0
+        total_length = sum(cv2.arcLength(c, True) for c in contours)
+        avg_length = total_length / len(contours)
+        diag = np.sqrt(processed.shape[0] ** 2 + processed.shape[1] ** 2)
+        return min(1.0, max(avg_length / (diag * 0.6), 0.0))
+
+    def detect_dots(self, image):
+        processed = self.preprocess_image(image)
+        params = cv2.SimpleBlobDetector_Params()
+        params.filterByArea = True
+        params.minArea = 5
+        params.maxArea = 200
+        detector = cv2.SimpleBlobDetector_create(params)
+        keypoints = detector.detect(processed)
+        return len(keypoints)
+
+    def calculate_overall_accuracy(self, image):
+        scores = {}
+        scores['symmetry'] = self.check_symmetry(image)
+        scores['continuous_lines'] = self.check_continuous_lines(image)
+        dot_count = self.detect_dots(image)
+        scores['dot_presence'] = min(dot_count / 20, 1.0)
+        overall_score = sum(scores[k] * self.weights[k] for k in scores)
+        return max(0.0, min(overall_score, 1.0)), scores
+
+if 'analyzer' not in st.session_state:
+    st.session_state.analyzer = KolamAnalyzer()
 if "gallery" not in st.session_state:
     st.session_state.gallery = []
-if "metadata" not in st.session_state:
-    st.session_state.metadata = []
 
 # -----------------------------
-# User Inputs
+# PROMPT CREATOR
 # -----------------------------
-st.markdown("<h3 style='text-align: center;'>🌸🎊🪔 Choose Your Options 🌈</h3>", unsafe_allow_html=True)
+def create_advanced_kolam_prompt(kolam_type, state, complexity, grid_size, color_scheme, occasion, custom_elements):
+    return f"""
+    Generate a high-quality, symmetric Kolam design with:
+    - Base grid: 1-3-5-7-9-7-5-3-1 stepped dot grid
+    - Style: Traditional {state} Kolam, smooth white continuous lines on dark wet floor
+    - Symmetry: Reflectional + rotational symmetry must be preserved
+    - Look: Clean, geometric, elegant, no extra objects, no text
+    - Grid size: {grid_size}
+    - Complexity: {complexity}
+    - Color scheme: {color_scheme} (must follow this palette)
+    - Occasion: {occasion}
+    - Custom elements: {custom_elements if custom_elements else "Lotus, peacock, temple motifs"}
+    Output ONLY a clear single design focused on the Kolam pattern.
+    """
 
-col1, col2, col3 = st.columns([1,2,1])
+# -----------------------------
+# SIDEBAR CONFIG
+# -----------------------------
+st.sidebar.header("🎨 Kolam Design Studio")
+col1, col2 = st.sidebar.columns(2)
+with col1:
+    kolam_type = st.selectbox("Kolam Style", ["Sikku Kolam", "Pulli Kolam", "Rangoli", "Geometric Kolam"], index=1)
+    state = st.selectbox("Regional Style", ["Tamil Nadu", "Karnataka", "Andhra Pradesh", "Kerala", "Telangana"])
 with col2:
-    state = st.selectbox("🗺 Choose a State", [""] + list(state_prompts.keys()))
-    festival = st.selectbox("🎉 Choose Festival/Occasion (Optional)", ["None", "Pongal", "Diwali", "Onam", "Holi", "Navratri"])
-    generate = st.button("✨ Generate Kolam ✨", use_container_width=True)
+    complexity = st.selectbox("Complexity", ["Beginner", "Intermediate", "Advanced"], index=1)
+    grid_size = st.slider("Pattern Density", 8, 20, 12)
+
+color_scheme = st.sidebar.selectbox("Color Theme", ["Vibrant Festival", "Royal Colors", "Pastel Dream"])
+occasion = st.sidebar.selectbox("Occasion", ["Daily Practice", "Diwali", "Pongal", "Wedding"])
+custom_elements = st.sidebar.text_area("Custom Elements", placeholder="peacock motifs, temple arches...", height=80)
 
 # -----------------------------
-# Background Change for Festival
+# GENERATE BUTTON
 # -----------------------------
-if festival != "None":
-    festival_colors = {
-        "Pongal": "#FFF5E6",
-        "Diwali": "#1a1a1a",
-        "Onam": "#E6FFE6",
-        "Holi": "#FFF0F5",
-        "Navratri": "#FFF8E1"
-    }
-    st.markdown(f"<style>body{{background-color: {festival_colors.get(festival, '#FFFFFF')};}}</style>", unsafe_allow_html=True)
-
-# -----------------------------
-# Kolam Generation
-# -----------------------------
-if generate:
-    if not state:
-        st.warning("⚠ Please select a state first.")
-    else:
-        prompt = state_prompts[state]
-        if festival != "None":
-            prompt += f" for {festival} festival"
-
-        st.info(f"✨ Generating a unique Kolam for {state}...")
-
+if st.sidebar.button("✨ Generate Kolam", use_container_width=True):
+    with st.spinner("🎭 AI is creating your masterpiece..."):
         try:
-            adjectives = ["vibrant", "intricate", "colorful", "modern", "decorative", "traditional", "elegant"]
-            layouts = ["symmetrical", "asymmetrical", "circular", "geometric", "ornamental"]
-            style = random.choice(adjectives)
-            layout_choice = random.choice(layouts)
-            unique_prompt = f"{prompt}, {style}, {layout_choice}, --seed {random.randint(1000,9999)}"
-            polli_url = f"https://image.pollinations.ai/prompt/{quote(unique_prompt)}"
+            prompt = create_advanced_kolam_prompt(
+                kolam_type, state, complexity, grid_size, color_scheme, occasion, custom_elements
+            )
 
-            with st.spinner("🎨 Generating Kolam..."):
-                response = requests.get(polli_url)
+            response = client.models.generate_content(
+                model="gemini-2.5-flash-image-preview",
+                contents=prompt
+            )
 
-            if "image" in response.headers.get("Content-Type", ""):
-                img = Image.open(BytesIO(response.content))
-                st.session_state.gallery.append((img, state))
+            image_parts = [
+                part.inline_data.data
+                for part in response.candidates[0].content.parts
+                if part.inline_data
+            ]
 
-                # Accuracy simulation
-                accuracy = random.randint(70, 95)
-                st.session_state.metadata.append({
-                    "state": state,
-                    "festival": festival,
-                    "style": style,
-                    "layout": layout_choice,
-                    "accuracy": accuracy
-                })
+            if image_parts:
+                image = Image.open(BytesIO(image_parts[0]))
 
-                # Confetti
+                # Analyze Image
+                overall_score, detailed_scores = st.session_state.analyzer.calculate_overall_accuracy(image)
+                st.session_state.gallery.append((image, state, overall_score, detailed_scores))
+
+                # Display
+                col1, col2 = st.columns([2, 1])
+                with col1:
+                    st.image(image, use_container_width=True, caption=f"✨ {kolam_type} Kolam from {state}")
+                    buffer = BytesIO()
+                    image.save(buffer, format="PNG")
+                    st.download_button(
+                        label="⬇ Download Kolam",
+                        data=buffer.getvalue(),
+                        file_name=f"{kolam_type}_{state}_{complexity}.png",
+                        mime="image/png"
+                    )
+
+                with col2:
+                    st.subheader("📊 Kolam Accuracy Analysis")
+                    accuracy_percentage = overall_score * 100
+                    st.markdown(f"### {'🟢' if accuracy_percentage>70 else '🟡'} Overall Score: {accuracy_percentage:.1f}%")
+                    st.progress(overall_score)
+                    st.write(f"🔄 Symmetry: {detailed_scores['symmetry']*100:.1f}%")
+                    st.write(f"➰ Continuous Lines: {detailed_scores['continuous_lines']*100:.1f}%")
+                    st.write(f"⚫ Dot Presence: {detailed_scores['dot_presence']*100:.1f}%")
+
                 components.html("""
                 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
                 <script>
-                confetti({
-                  particleCount: 200,
-                  spread: 70,
-                  origin: { y: 0.6 }
-                });
+                confetti({ particleCount: 200, spread: 70, origin: { y: 0.6 } });
                 </script>
                 """, height=200)
 
             else:
-                st.error("❌ Pollinations did not return an image. Try again.")
+                st.error("⚠️ No image was generated. Try again with different settings.")
 
         except Exception as e:
-            st.error(f"❌ Could not generate image: {e}")
+            st.error(f"❌ Error: {str(e)}")
 
 # -----------------------------
-# Show Result
+# GALLERY OF PREVIOUS KOLAMS
 # -----------------------------
 if st.session_state.gallery:
-    img, state_name = st.session_state.gallery[-1]
-    metadata = st.session_state.metadata[-1]
-
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.image(img, caption=f"🖌 Kolam of {state_name}", use_container_width=True)
-
-    # Download
-    buffer = BytesIO()
-    img.save(buffer, format="PNG")
-    st.download_button(
-        label="⬇ Download Kolam",
-        data=buffer.getvalue(),
-        file_name=f"{state_name}_kolam.png",
-        mime="image/png"
-    )
-
-    # Accuracy & Visualization
-    st.subheader("📊 Kolam Insights")
-    st.write(f"*Style:* {metadata['style'].title()}")
-    st.write(f"*Layout:* {metadata['layout'].title()}")
-    st.write(f"*Accuracy Score:* {metadata['accuracy']}%")
-
-    # Visualization chart
-    categories = ["Accuracy", "Style Score", "Layout Score"]
-    values = [
-        metadata["accuracy"],
-        random.randint(60, 95),
-        random.randint(60, 95)
-    ]
-
-    fig, ax = plt.subplots(figsize=(5, 3.5))
-    bars = ax.bar(categories, values, color=["#6a5acd", "#ff69b4", "#20b2aa"])
-    ax.set_ylim(0, 100)
-    ax.set_ylabel("Score (%)")
-
-    for bar in bars:
-        height = int(bar.get_height())
-        ax.text(
-            bar.get_x() + bar.get_width() / 2.0,
-            height - 6 if height > 12 else height + 2,
-            f"{height}%",
-            ha="center",
-            va="bottom",
-            weight="bold",
-            color="white" if height > 12 else "black"
-        )
-
-    st.pyplot(fig)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# -----------------------------
-# Gallery of Previous Kolams
-# -----------------------------
-if st.session_state.gallery and len(st.session_state.gallery) > 1:
-    st.markdown("### 🖼 Previous Kolams Generated")
+    st.markdown("### 🖼 Previous Kolams")
     cols = st.columns(3)
-    for idx, (img, state_name) in enumerate(st.session_state.gallery[:-1]):
+    for idx, (img, state_name, acc, _) in enumerate(sorted(st.session_state.gallery, key=lambda x: x[2], reverse=True)):
         with cols[idx % 3]:
-            st.image(img, caption=f"{state_name}", use_container_width=True)
+            st.image(img, caption=f"{state_name} ({acc*100:.1f}%)", use_container_width=True)
