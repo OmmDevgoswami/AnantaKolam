@@ -1,5 +1,5 @@
 import streamlit as st
-from cards import analysis_card, blog_card, one_on_one_card, kolam_canva_card, kolam_generator_card
+from cards import analysis_card, blog_card, one_on_one_card, kolam_canva_card, kolam_generator_card, community_card
 
 pages = [
     st.Page(
@@ -31,6 +31,11 @@ pages = [
         "Special_One_on_One.py",
         title="Special One-on-One",
         icon=":material/person_raised_hand:"
+    ),
+    st.Page(
+        "Community.py",
+        title="Kolam Community",
+        icon=":material/diversity_3:"
     )
 ]
 
@@ -48,6 +53,8 @@ with st.sidebar.container(height = 380):
         kolam_canva_card()
     elif page.title == "Special One-on-One":
         one_on_one_card()
+    elif page.title == "Kolam Community":
+        community_card()
     else:
         st.page_link("Home.py", label="Home", icon=":material/home:")
         st.write("Welcome to the AnantaKolam ")

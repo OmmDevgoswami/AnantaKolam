@@ -1,5 +1,5 @@
 import streamlit as st
-from cards import analysis_card, blog_card, one_on_one_card, kolam_canva_card, kolam_generator_card
+from cards import analysis_card, blog_card, one_on_one_card, kolam_canva_card, kolam_generator_card, community_card
 
 st.set_page_config(page_title="AnantaKolam", layout="wide")
 
@@ -489,5 +489,7 @@ with cols[0].container(height = 380):
     kolam_canva_card()
 with cols[1].container(height = 380):
     one_on_one_card()
+with cols[2].container(height = 380):    
+    community_card()
 
 st.markdown(""" <div class="kolam-pattern-3"></div> """, unsafe_allow_html=True)

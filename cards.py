@@ -194,4 +194,16 @@ def one_on_one_card():
             """, unsafe_allow_html=True)
             st.button("7:30 PM" , type = "secondary")
 
-            
+def community_card():
+    st.page_link("Community.py" , label = "Community", icon = ":material/diversity_3:")
+    st.markdown("<h2>🌐 Join Our Kolam Community!</h2>", unsafe_allow_html=True)
+    st.markdown("""
+        Connect with fellow kolam enthusiasts, share your designs, and learn from each other. Whether you're a beginner or an expert, our community is here to support and inspire you.
+        
+        - **Share Your Kolam Designs**: Post your latest creations and get feedback.
+        - **Join Discussions**: Participate in forums about kolam techniques, history, and culture.
+        - **Attend Events**: Stay updated on kolam workshops, webinars, and meetups.
+        
+        Click the button below to join our vibrant kolam community!
+        """)
+    st.button("Join Now", type="primary", use_container_width=True)
