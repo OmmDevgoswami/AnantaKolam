@@ -1,4 +1,3 @@
-import os
 import streamlit as st
 from agno.agent import Agent
 from agno.models.openai.like import OpenAILike
@@ -10,14 +9,14 @@ import tempfile
 import langdetect
 from PIL import Image
 from deep_translator import GoogleTranslator
-
+import os
 load_dotenv()
 
-SUTRA_API_KEY = os.getenv("SUTRA_API_KEY")
+SUTRA_API = os.getenv("SUTRA_API_KEY")
 
 sutra_model = OpenAILike(
     id="sutra-v2",
-    api_key=SUTRA_API_KEY,
+    api_key=SUTRA_API,
     base_url="https://api.two.ai/v2",
     extra_headers={
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
@@ -25,7 +24,7 @@ sutra_model = OpenAILike(
     }
 )
 
-referred_languagesutra_agent = Agent(
+sutra_agent = Agent(
     name="Kolam Multilingual Analyzer",
     model=sutra_model,
     instructions=[
@@ -41,7 +40,7 @@ referred_languagesutra_agent = Agent(
 st.set_page_config(page_title="🎨 Kolam Multilingual Analyzer", layout="wide")
 st.title("🎨 Kolam Art - Multilingual Analyzer")
 
-p = st.selectbox("🌎 Preferred Language:", ["Auto-Detect", "English", "Hindi", "Tamil", "Telugu", "Kannada", "Malayalam"])
+preferred_language = st.selectbox("🌎 Preferred Language:", ["Auto-Detect", "English", "Hindi", "Tamil", "Telugu", "Kannada", "Malayalam"])
 
 uploaded_file = st.file_uploader("📤 Upload Kolam Image", type=["png", "jpg", "jpeg"])
 

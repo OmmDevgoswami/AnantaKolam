@@ -9,9 +9,7 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Lato:wght@300;400;600;700&family=Dancing+Script:wght@400;700&display=swap');
     
     /* Hide Streamlit default elements */
-    #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    header {visibility: hidden;}
     
     /* Main container styling */
     .main > div {
@@ -486,7 +484,7 @@ with cols[0].container(height = 380):
 with cols[1].container(height = 380):
     kolam_canva_card()
 with cols[0].container(height = 380):
-    kolam_generator_card
+    kolam_generator_card()
 with cols[1].container(height = 380):
     one_on_one_card()
 
