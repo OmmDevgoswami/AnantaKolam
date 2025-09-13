@@ -61,15 +61,29 @@ def analysis_card():
             """)
     
 def blog_card():
-    st.page_link("Blog.py" , label = "blog", icon = ":material/indeterminate_question_box:")
-    user_input = st.text_input("How May i assist you ?", placeholder = "Let's work out this doubt together...")
-    audio_input = st.audio_input("Here to help you !!")
-    if user_input or audio_input:
-        with st.spinner("Generating the Response.."):
-            st.success("Content Generated !! Click Here to have the full use of this feature.")
+    st.page_link("Blog.py" , label = "blog", icon = ":material/auto_stories:")
+
+    st.write("""
+        Imagine this: it's early morning in a South Indian village. The sun is not yet up, the ground is cool and freshly washed with water, and you see women bending down in front of their homes with a small bowl of white powder in their hands. 
+        
+        Slowly, dot by dot, line by line, they create stunning patterns on the ground. By the time the street wakes up, the entire road looks decorated with lace-like white drawings.
+        """)
+
+    st.markdown('<div class="quote-highlight">This is called a <strong>Kolam</strong>.</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Enhanced What is Kolam Section
+    st.markdown('<div class="section-container section-peach">', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-title">🪔 What is Kolam?</h2>', unsafe_allow_html=True)
+
+    st.write("""
+        Kolam is a traditional floor art practiced in Tamil Nadu and across South India for thousands of years. It is made using rice flour, chalk powder, or sometimes colored powders.
+
+        The designs are usually based on a grid of dots, which are then connected with curves, loops, and lines to form symmetrical and geometric patterns.
+        """)
             
 def kolam_generator_card():
-    st.page_link("Kolam_Generator.py" , label = "blog", icon = ":material/indeterminate_question_box:")
+    st.page_link("Kolam_Generator.py" , label = "Kolam Generator", icon = ":material/draw_collage:")
     st.markdown("<h1>🖌️ Kolam Kraziness</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color: gray; font-size:18px;'>Click generate and watch your Kolam dots dance! 🌸✨</p>", unsafe_allow_html=True)
             
@@ -100,11 +114,11 @@ def kolam_canva_card():
             st.session_state["selected_color"] = hex_color
     
 def one_on_one_card():
-    st.page_link("Special_One_on_One.py" , label = "one_one", icon = ":material/person_raised_hand:")
-    choice = st.selectbox("Choose your path",
-    ("JEE", "NEET", "UPSC"),
+    st.page_link("Special_One_on_One.py" , label = "Kolam Masters", icon = ":material/person_raised_hand:")
+    choice = st.selectbox("Design that Speaks your Mind:",
+    ("Traditional Pulli Kolam", "Sikku Kolam (Knot patterns)", "Kavi Kolam (Temple style)"),
     index = None,
-    placeholder = "Guru of Subjects..."
+    placeholder = "Kolam Masters"
 )
     
     card_style = """

@@ -10,7 +10,7 @@ pages = [
     st.Page(
         "Blog.py",
         title="Kolam: Heritage & Culture",
-        icon=":material/view_timeline:"
+        icon=":material/auto_stories:"
     ),
     st.Page(
         "Analysis.py",
@@ -20,7 +20,7 @@ pages = [
     st.Page(
         "Kolam_Generator.py",
         title="Kolam: Generate Cultural Patterns Digitals",
-        icon=":material/analytics:"
+        icon=":material/draw_collage:"
     ),
     st.Page(
         "kolam_Canva.py",

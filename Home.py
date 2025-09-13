@@ -478,13 +478,15 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-cols = st.columns(2)
+cols = st.columns(3)
 with cols[0].container(height = 380):
-    analysis_card()
+    blog_card()
 with cols[1].container(height = 380):
-    kolam_canva_card()
-with cols[0].container(height = 380):
+    analysis_card()
+with cols[2].container(height = 380):
     kolam_generator_card()
+with cols[0].container(height = 380):
+    kolam_canva_card()
 with cols[1].container(height = 380):
     one_on_one_card()
 
