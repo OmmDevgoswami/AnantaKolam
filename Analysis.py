@@ -50,7 +50,69 @@ if uploaded_file:
 
 query = st.text_area("Add any extra context (optional):")
 
-KOLAM_PROMPT = """If this is a kolam art then only reply otherwise say that \"Are you sure this is a kolam?\".\n\nIf this is a kolam then list out the following things in a systematic manner:\n\n1. The specific region of India this kolam belongs to?\n2. About the mathematical significance of this design\n3. Number of grids this kolam has?\n4. History of this type of kolam?\n5. Its importance"""
+KOLAM_PROMPT = """To create a powerful model that can analyze any Kolam image, we need a robust and well-structured text format that can accurately capture all the intricacies of a Kolam design, including its mathematical underpinnings. Below is an improved prompt structure in a well-formatted text, incorporating mathematical expressions for dot grid calculations and further enhancing the detail in other sections. This structure aims to be comprehensive and adaptable for various Kolam designs.
+Kolam Design Analysis Report
+This report provides a comprehensive analysis of a Kolam design based on its visual characteristics and underlying mathematical principles.
+1. Design Identification
+Name: [Name of the kolam design (e.g., '1-3-5-7-9-7-5-3-1 Parallel dots', 'Hearth Kolam')]
+Origin:
+Region: South India
+State: Tamil Nadu
+Description: [A brief description of the design, its visual characteristics, and cultural significance. For instance, "This Kolam features a symmetrical arrangement of loops and lines, often drawn during festivals to invite prosperity and positive energy."]
+2. Dot Grid Structure (Pulli)
+Grid Type: [The arrangement of the dots (pulli) (e.g., 'square', 'stepped', 'free shape', 'hexagonal')]
+Dimensions:
+For Square Grids (n x n):
+n (Number of dots in a row/column): [e.g., 5]
+Total Pulli (dots): n^2 = [Calculated value]
+For Stepped Grids (e.g., 1-3-5-3-1):
+n (Number of dots in the center row): [e.g., 5 or 9]
+Total Pulli (dots): 2 * ((n-1)/2)^2 + n = [Calculated value] (This formula assumes a symmetrical stepped pattern where the number of dots increases by 2 in each step up to the center, and then decreases. For instance, for 1-3-5, n=5, total = 2*((5-1)/2)^2 + 5 = 2*(2)^2 + 5 = 8 + 5 = 13. For 1-3-5-7-5-3-1, n=7, total = 2*((7-1)/2)^2 + 7 = 2*(3)^2 + 7 = 18 + 7 = 25.)
+For General/Free-Shape Grids:
+Total Pulli (dots): [Calculated total number of dots based on image analysis]
+3. Line Drawing Characteristics (Kambi)
+Path Type: [Classification of the line drawing (e.g., 'single loop', 'multiple loops', 'interconnected patterns')]
+Graph Theory Model: [Graph theory concept that applies (e.g., 'Eulerian path', 'Eulerian circuit', 'Hamiltonian Cycle', 'Traveling Salesman Problem', 'Planar Graph')]
+Line Properties:
+Line Style: [Type of lines used ('linear', 'curvilinear', 'combination')]
+Stroke Continuity: [Is the drawing completed with a single, uninterrupted line? (True/False)]
+4. Geometric Properties
+Symmetry:
+Type: [Type of symmetry present ('reflectional', 'rotational', 'both', 'none')]
+Lines of Reflection: [Number of lines of reflection symmetry (e.g., 1, 2, 4, 8)]
+Angle of Rotational Symmetry: [Smallest angle of rotational symmetry in degrees (e.g., 90, 120, 180, 360)]
+Pattern Rules (Observed/Deduced):
+Loop drawing-lines, and never trace a line through the same route.
+The drawing is completed when all points are enclosed by a drawing-line.
+Straight lines are drawn along the dual grid inclined at an angle of 45 degrees (if applicable).
+Arcs are drawn surrounding the points (if applicable).
+There must be symmetry in the drawings (if applicable).
+[Add any other specific rules or patterns observed in the given Kolam.]
+5. Graph Theory Analysis Results
+Has Euler Path: [Does the design contain an Euler path? (True/False)]
+Has Euler Circuit: [Does the design contain an Euler circuit? (True/False)]
+Justification:
+If the graph has exactly two odd vertices, it contains an Euler path.
+If all vertices are even, it contains an Euler path and an Euler circuit.
+[Provide a detailed explanation based on the identified number of odd and even vertices in the Kolam's underlying graph representation.]
+6. Extensibility
+Description: [Description of how the pattern can be extended (e.g., 'by increasing the number of dots in a uniform manner', 'by adding concentric layers', 'by repeating the base module')]
+7. Cultural Context
+Purpose: Decoration, a daily tribute to harmonious co-existence, a welcoming sign to all beings including the Goddess Lakshmi, an act of meditation and prayer.
+Materials: White rice powder, powdered white stone, diluted rice paste, cow dung, synthetic colored powders.
+Process: Drawn daily in the morning on a cleaned and dampened surface, typically at the entrance of homes.
+Artisans: Traditionally drawn by women, now also practiced by men in various cultural contexts.
+To make this model "powerful," the core challenge lies in the image analysis itself. An AI model for Kolam analysis would need to perform the following:
+Dot Detection and Grid Inference: Accurately identify the individual dots (pulli) and determine their arrangement (square, stepped, hexagonal, or free-form).
+Line Tracing and Graph Construction: Trace the lines (kambi) connecting the dots, representing them as edges in a graph where dots are vertices.
+Symmetry Detection: Analyze the arrangement of dots and lines to identify various types of symmetry (reflectional, rotational).
+Mathematical Calculation: Apply the appropriate formulas based on the identified grid type to calculate the total number of dots.
+Graph Theory Properties: Analyze the constructed graph to determine properties like the number of odd/even vertices to infer the presence of Euler paths/circuits.
+Pattern Recognition: Identify recurring motifs, line styles, and overall design principles.
+Extensibility Inference: Based on the observed patterns, predict how the design could be extended.
+Text Generation: Synthesize all the extracted information into the structured text format provided above.
+This detailed JSON structure, combined with advanced image processing and AI pattern recognition, will enable a comprehensive analysis of any Kolam image.
+"""
 
 if st.button("🧠 Analyze with Sutra"):
     if not uploaded_file:
@@ -60,12 +122,13 @@ if st.button("🧠 Analyze with Sutra"):
         with st.spinner("Analyzing Kolam with Sutra..."):
             try:
                 response = sutra_agent.run(full_prompt).content.strip()
-            except Exception as e:
+            except Exception:
                 st.error("⚠️ Could not connect to Sutra API. Please try again later.")
                 response = ""
 
             if response:
-                detected_language = "English"
+                # 🔎 Detect input language (if query provided)
+                detected_language = "en"
                 try:
                     detected_language = langdetect.detect(query) if query.strip() else "en"
                 except:
@@ -73,21 +136,31 @@ if st.button("🧠 Analyze with Sutra"):
 
                 target_language = preferred_language
                 if preferred_language == "Auto-Detect":
-                    lang_map = {'en': 'English', 'hi': 'Hindi', 'ta': 'Tamil', 'te': 'Telugu', 'kn': 'Kannada', 'ml': 'Malayalam'}
+                    lang_map = {
+                        'en': 'English', 'hi': 'Hindi', 'ta': 'Tamil',
+                        'te': 'Telugu', 'kn': 'Kannada', 'ml': 'Malayalam'
+                    }
                     target_language = lang_map.get(detected_language, "English")
+
+                # ✅ Show original analysis first
+                st.markdown("### ✅ Kolam Analysis:")
 
                 if target_language != "English":
                     try:
-                        translator = Translator()
-                        lang_codes = {"Hindi": "hi", "Tamil": "ta", "Telugu": "te", "Kannada": "kn", "Malayalam": "ml"}
+                        lang_codes = {
+                            "Hindi": "hi", "Tamil": "ta", "Telugu": "te",
+                            "Kannada": "kn", "Malayalam": "ml"
+                        }
                         lang_code = lang_codes.get(target_language, "en")
-                        translated_response = translator.translate(response, dest=lang_code).text
+                        translated_response = GoogleTranslator(
+                            source='auto', target=lang_code
+                        ).translate(response)
+
                         st.markdown(f"### 🌐 Translated Answer ({target_language}):")
                         st.write(translated_response)
                     except Exception as e:
                         st.warning(f"Translation unavailable: {e}")
-
-                st.markdown("### ✅ Kolam Analysis:")
-                translated_response = GoogleTranslator(source='auto', target=lang_code).translate(response)
-                st.markdown(f"### 🌐 Translated Answer ({target_language}):")
-                st.write(translated_response)
+                        st.write(response)  # fallback to English
+                else:
+                    # Directly show English without translation
+                    st.write(response)
